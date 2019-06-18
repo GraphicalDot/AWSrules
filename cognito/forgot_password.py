@@ -1,4 +1,3 @@
-
 import json
 import boto3
 import botocore.exceptions
@@ -29,34 +28,32 @@ def lambda_handler(event, context):
     
     try:
         username = event['username']
+        password = event['newpassword']
+        code = event['code']
 
-        response = client.forgot_password(
-            ClientId=CLIENT_ID,
-            SecretHash=get_secret_hash(username),
-            Username=username,
-            UserContextData={
-                'EncodedData': 'string'
-            },
-            AnalyticsMetadata={
-                'AnalyticsEndpointId': 'string'
-            }
+        client.confirm_forgot_password(
+        ClientId=CLIENT_ID,
+        SecretHash=get_secret_hash(username),
+        Username=username,
+        ConfirmationCode=code,
+        Password=password,
+        AnalyticsMetadata={
+            'AnalyticsEndpointId': 'string'
+        },
+        UserContextData={
+            'EncodedData': 'string'
+        }
         )
-
     except client.exceptions.UserNotFoundException as e:
-        return {"error": True, "success": False, "message": "Username doesnt exists"}
+        return {"error": True, "success": False, "message": "Username doesnt exists", "data": None}
         
-    except client.exceptions.InvalidParameterException as e:
-        return {"error": True, "success": False, "message": f"User <{username}> is not confirmed yet"}
-    
     except client.exceptions.CodeMismatchException as e:
-        return {"error": True, "success": False, "message": "Invalid Verification code"}
+        return {"error": True, "success": False, "message": "Invalid Verification code", "data": None}
         
     except client.exceptions.NotAuthorizedException as e:
-        return {"error": True, "success": False, "message": "User is already confirmed"}
+        return {"error": True, "success": False, "message": "User is already confirmed", "data": None}
     
     except Exception as e:
-        return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} "}
-     
-    print ("This is the response",  response) 
-    return event
-
+        return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} ", "data": None}
+      
+    return {"error": False, "success": True, "message": f"Password has been changed successfully", "data": None}

@@ -10,8 +10,8 @@ from boto3.dynamodb.conditions import Key, Attr
 
 import decimal
 DYNAMODB_URL = "http://dynamodb.ap-south-1.amazonaws.com"
-DYNAMODB_REGION = "ap-south-1"
-TABLE_NAME = "users"
+DYNAMODB_REGION = ""
+TABLE_NAME = ""
 # Helper class to convert a DynamoDB item to JSON.
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -32,28 +32,29 @@ def lambda_handler(event, context):
     try:
         response = table.get_item(
             Key={
-                'email': event["username"],
+                'username': event["username"],
             }
         )
         if response.get("Item"):
-            return {"error": False, "success": True, "message": "User already exists"}
+            return {"error": True, "success": False, "message": "User already exists", "data": None}
         else:
           response = table.put_item(
               Item={
-                  'email': event["username"],
+                  'username': event["username"],
+                  'email': event["email"],
                   'user_id': user_id,
-                  "created_at": decimal.Decimal(datetime.now().timestamp())
-            
+                  "created_at": decimal.Decimal(datetime.now().timestamp()),
+                  "public": event["public"], 
+                  "name": event["name"],
+                  "sha_512": hashlib.sha3_512(event["mnemonic"].encode()).hexdigest(),
+                  "sha_256": hashlib.sha3_256(event["mnemonic"].encode()).hexdigest()
                 }
             )
   
-        
-    except ClientError as e:
-        return {"error": True, "success": False, "message": e.response['Error']['Message'] }
 
     except Exception as e:
         return {"error": True, "success": False, "message": e.__str__() }
 
-    return {"error": False, "success": True, "message": "User successfully created"}
+    return {"error": False, "success": True, "message": "User successfully created", "data": None}
 
 

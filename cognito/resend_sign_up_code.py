@@ -6,12 +6,11 @@ import hashlib
 import base64
 import uuid
 
-
 USER_POOL_ID = ''
 CLIENT_ID = ''
 CLIENT_SECRET = ''
-
 client = None
+
 def get_secret_hash(username):
     msg = username + CLIENT_ID
     dig = hmac.new(str(CLIENT_SECRET).encode('utf-8'), 
@@ -35,12 +34,12 @@ def lambda_handler(event, context):
         Username=username,
     )
     except client.exceptions.UserNotFoundException as e:
-        return {"error": True, "success": False, "message": "Username doesnt exists"}
+        return {"error": True, "success": False, "message": "Username doesnt exists", "data": None}
         
     except client.exceptions.InvalidParameterException as e:
-        return {"error": True, "success": False, "message": "User is already confirmed"}
+        return {"error": True, "success": False, "message": "User is already confirmed", "data": None}
     
     except Exception as e:
         return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} "}
       
-    return  {"error": False, "success": True}
+    return  {"error": False, "success": True, "message": "Code successfully sent", "data": None}
