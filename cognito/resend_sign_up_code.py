@@ -43,3 +43,7 @@ def lambda_handler(event, context):
         return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} "}
       
     return  {"error": False, "success": True, "message": "Code successfully sent", "data": None}
+
+
+
+

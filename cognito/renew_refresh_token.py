@@ -1,3 +1,4 @@
+
 import boto3
 import botocore.exceptions
 import hmac
@@ -58,16 +59,18 @@ def lambda_handler(event, context):
     if msg != None:
         return {'message': msg, "error": True, "success": False, "data": None}    
     
-    response = client.admin_user_global_sign_out(
-            UserPoolId=USER_POOL_ID,
-            Username=event["username"]
-        )
-    print (response)
+    # response = client.admin_user_global_sign_out(
+    #         UserPoolId=USER_POOL_ID,
+    #         Username=event["username"]
+    #     )
     if resp.get("AuthenticationResult"):
         return {'message': "success", "error": False, "success": True, "data": {
             "id_token": resp["AuthenticationResult"]["IdToken"],
             "access_token": resp["AuthenticationResult"]["AccessToken"], "expires_in": resp["AuthenticationResult"]["ExpiresIn"],
             "token_type": resp["AuthenticationResult"]["TokenType"]
         }}
-    
+    else:
+        return {'message': "Refresh token couldnt refreshed", "error": True, "success": False, "data": None}    
+
+        
     

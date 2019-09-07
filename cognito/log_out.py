@@ -34,3 +34,4 @@ def lambda_handler(event, context):
     return {'message': "User successfully logged out", "error": False, "success": True, "data": None}
     
     
+    

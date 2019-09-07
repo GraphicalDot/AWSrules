@@ -1,3 +1,4 @@
+
 import json
 import boto3
 import botocore.exceptions
@@ -7,9 +8,11 @@ import base64
 import uuid
 
 
+
 USER_POOL_ID = ''
 CLIENT_ID = ''
 CLIENT_SECRET = ''
+
 
 client = None
 def get_secret_hash(username):
@@ -24,36 +27,39 @@ def lambda_handler(event, context):
     if client == None:
         client = boto3.client('cognito-idp')
 
-    
-    
     try:
         username = event['username']
-        password = event['newpassword']
-        code = event['code']
+    except :
+        return {"error": True, "success": False, "message": "Please provide username", "data": None}
+        
 
-        client.confirm_forgot_password(
-        ClientId=CLIENT_ID,
-        SecretHash=get_secret_hash(username),
-        Username=username,
-        ConfirmationCode=code,
-        Password=password,
-        AnalyticsMetadata={
-            'AnalyticsEndpointId': 'string'
-        },
-        UserContextData={
-            'EncodedData': 'string'
-        }
+    try:
+        response = client.forgot_password(
+            ClientId=CLIENT_ID,
+            SecretHash=get_secret_hash(username),
+            Username=username,
+            UserContextData={
+                'EncodedData': 'string'
+            },
+            AnalyticsMetadata={
+                'AnalyticsEndpointId': 'string'
+            }
         )
+
     except client.exceptions.UserNotFoundException as e:
         return {"error": True, "success": False, "message": "Username doesnt exists", "data": None}
         
+    except client.exceptions.InvalidParameterException as e:
+        return {"error": True, "success": False, "message": f"User <{username}> is not confirmed yet",  "data": None}
+    
     except client.exceptions.CodeMismatchException as e:
-        return {"error": True, "success": False, "message": "Invalid Verification code", "data": None}
+        return {"error": True, "success": False, "message": "Invalid Verification code",  "data": None}
         
     except client.exceptions.NotAuthorizedException as e:
-        return {"error": True, "success": False, "message": "User is already confirmed", "data": None}
+        return {"error": True, "success": False, "message": "User is already confirmed",  "data": None}
     
     except Exception as e:
-        return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} ", "data": None}
-      
-    return {"error": False, "success": True, "message": f"Password has been changed successfully", "data": None}
+        return {"error": True, "success": False, "message": f"Uknown error {e.__str__()} ",  "data": None}
+     
+    return {"error": False, "success": True, "message": f"Please check your Registered email id for validation code",  "data": None}
+
